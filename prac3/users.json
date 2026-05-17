@@ -1,0 +1,11 @@
+{
+    "users": [
+        {
+            "username": "admin",
+            "password_hash": "scrypt:32768:8:1$lwbRH5zYDCarEqhu$f83505d97f40f6327a997a066886101c3090d09b8ee8e9e1be9d31dec16ac5565735928e47cdca5c3955dfcd9ac2815ce4cf05a10083528a4bedb896fb45db85",
+            "is_admin": true,
+            "registered_at": "2026-05-18 01:27:55",
+            "last_login_at": "2026-05-18 01:28:12"
+        }
+    ]
+}

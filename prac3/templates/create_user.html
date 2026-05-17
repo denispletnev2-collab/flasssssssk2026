@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление пользователями</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Mono:wght@300;400&display=swap');
+
+        :root {
+            --bg: #0e0e0e;
+            --surface: #161616;
+            --border: #2a2a2a;
+            --accent: #c8f04a;
+            --text: #e8e8e8;
+            --muted: #666;
+            --error: #ff5b5b;
+            --success: #c8f04a;
+            --warning: #f0c84a;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            padding: 48px 24px;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        /* ── Header ── */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 48px;
+            animation: fadeDown 0.4s ease both;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            letter-spacing: -0.03em;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .logout-link {
+            color: var(--error);
+            text-decoration: none;
+            border-bottom: 1px dashed currentColor;
+            font-size: 0.75rem;
+        }
+
+        .logout-link:hover { color: #ff7b7b; }
+
+        /* ── Flashes ── */
+        .flashes {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 32px;
+            animation: fadeDown 0.4s ease 0.05s both;
+        }
+
+        .flash {
+            padding: 10px 16px;
+            border-left: 3px solid;
+            font-size: 0.8rem;
+        }
+
+        .flash.danger  { border-color: var(--error);   color: var(--error); }
+        .flash.success { border-color: var(--success);  color: var(--success); }
+        .flash.warning { border-color: var(--warning);  color: var(--warning); }
+
+        /* ── Layout ── */
+        .layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        @media (max-width: 720px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+        /* ── Form card ── */
+        .form-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 32px;
+            animation: fadeDown 0.5s ease 0.1s both;
+        }
+
+        .form-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+
+        .field { margin-bottom: 18px; }
+
+        label {
+            display: block;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 7px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.85rem;
+            padding: 10px 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        .field-error {
+            margin-top: 5px;
+            font-size: 0.7rem;
+            color: var(--error);
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .checkbox-row label {
+            margin: 0;
+            font-size: 0.8rem;
+            text-transform: none;
+            letter-spacing: 0;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: #0e0e0e;
+            border: none;
+            border-radius: 3px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+
+        .btn:hover  { background: #d4f55a; }
+        .btn:active { transform: scale(0.99); }
+
+        /* ── User table ── */
+        .table-wrap { animation: fadeDown 0.5s ease 0.15s both; }
+
+        .section-label {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.62rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 12px;
+            font-size: 0.78rem;
+            border-bottom: 1px solid #1a1a1a;
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--surface); }
+
+        .uname {
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 0.65rem;
+            letter-spacing: 0.05em;
+            border: 1px solid;
+        }
+
+        .badge-admin {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .badge-user {
+            border-color: var(--border);
+            color: var(--muted);
+        }
+
+        .ts { color: var(--muted); font-size: 0.72rem; }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .del-btn {
+            background: none;
+            border: 1px solid #3a1a1a;
+            color: var(--error);
+            padding: 3px 9px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.72rem;
+            transition: background 0.15s;
+        }
+        .del-btn:hover { background: rgba(255,91,91,0.1); }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <div class="logo">user<span>panel</span></div>
+        <div class="header-right">
+            {% if current_user %}
+            <span>{{ current_user.username }}</span>
+            {% endif %}
+            <a href="{{ url_for('logout_page') }}" class="logout-link">выйти</a>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flashes">
+            {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="layout">
+
+        <!-- Форма создания -->
+        <div class="form-card">
+            <div class="form-title">Новый пользователь</div>
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="field">
+                    {{ form.username.label }}
+                    {{ form.username(placeholder="например: john_doe") }}
+                    {% for e in form.username.errors %}
+                    <div class="field-error">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="field">
+                    {{ form.password.label }}
+                    {{ form.password(placeholder="••••••••") }}
+                    {% for e in form.password.errors %}
+                    <div class="field-error">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="field">
+                    {{ form.password_confirm.label }}
+                    {{ form.password_confirm(placeholder="••••••••") }}
+                    {% for e in form.password_confirm.errors %}
+                    <div class="field-error">{{ e }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="checkbox-row">
+                    {{ form.is_admin() }}
+                    {{ form.is_admin.label }}
+                </div>
+
+                {{ form.submit(class="btn") }}
+            </form>
+        </div>
+
+        <!-- Таблица пользователей -->
+        <div class="table-wrap">
+            <div class="section-label">Пользователи — {{ users|length }}</div>
+
+            {% if users %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Логин</th>
+                        <th>Роль</th>
+                        <th>Регистрация</th>
+                        <th>Последний вход</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td class="uname">{{ u.username }}</td>
+                        <td>
+                            {% if u.is_admin %}
+                            <span class="badge badge-admin">admin</span>
+                            {% else %}
+                            <span class="badge badge-user">user</span>
+                            {% endif %}
+                        </td>
+                        <td class="ts">{{ u.registered_at }}</td>
+                        <td class="ts">{{ u.last_login_at or '—' }}</td>
+                        <td>
+                            {% if u.username == current_user.username %}
+                                <span style="color: var(--border); font-size: 0.7rem;">вы</span>
+                            {% elif u.username == 'admin' %}
+                                <span style="color: var(--border); font-size: 0.7rem;">—</span>
+                            {% elif u.is_admin and current_user.username != 'admin' %}
+                                <span style="color: var(--border); font-size: 0.7rem;">—</span>
+                            {% else %}
+                            <form method="POST" action="{{ url_for('delete_user_page', username=u.username) }}" onsubmit="return confirm('Удалить пользователя {{ u.username }}?')">
+                                <button type="submit" class="del-btn">✕</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">Пользователей пока нет</div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Mono:wght@300;400&display=swap');
+
+        :root {
+            --bg: #0e0e0e;
+            --surface: #161616;
+            --border: #2a2a2a;
+            --accent: #c8f04a;
+            --text: #e8e8e8;
+            --muted: #666;
+            --error: #ff5b5b;
+            --success: #c8f04a;
+            --warning: #f0c84a;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 420px;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .subtitle {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 36px;
+        }
+
+        .flashes {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .flash {
+            padding: 10px 14px;
+            border-left: 3px solid;
+            font-size: 0.8rem;
+        }
+
+        .flash.danger  { border-color: var(--error);   color: var(--error); }
+        .flash.success { border-color: var(--success);  color: var(--success); }
+        .flash.warning { border-color: var(--warning);  color: var(--warning); }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.9rem;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        .field-errors {
+            margin-top: 6px;
+        }
+
+        .field-error {
+            font-size: 0.72rem;
+            color: var(--error);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+            padding: 13px;
+            background: var(--accent);
+            color: #0e0e0e;
+            border: none;
+            border-radius: 3px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+
+        .btn:hover  { background: #d4f55a; }
+        .btn:active { transform: scale(0.99); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="logo">user<span>panel</span></div>
+    <div class="subtitle">Войдите с правами администратора</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flashes">
+            {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="field">
+            {{ form.username.label }}
+            {{ form.username(placeholder="admin") }}
+            {% if form.username.errors %}
+            <div class="field-errors">
+                {% for e in form.username.errors %}
+                <div class="field-error">{{ e }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="field">
+            {{ form.password.label }}
+            {{ form.password(placeholder="••••••••") }}
+            {% if form.password.errors %}
+            <div class="field-errors">
+                {% for e in form.password.errors %}
+                <div class="field-error">{{ e }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        {{ form.submit(class="btn") }}
+    </form>
+</div>
+</body>
+</html>
