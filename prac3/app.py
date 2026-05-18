@@ -26,7 +26,7 @@ VALID_STATUSES = ["cancelled", "completed", "in_progress", "pending"]
 VALID_PRIORITIES = ["high", "low", "medium"]
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "super-secret-flask-key-2024"
+app.config["SECRET_KEY"] = os.urandom(256)
 app.config["WTF_CSRF_ENABLED"] = True
 csrf.init_app(app)
 
@@ -166,7 +166,7 @@ class LoginForm(FlaskForm):
     )
     password = PasswordField(
         "Пароль",
-        validators=[DataRequired(message="Укажите пароль.")],
+        validators=[DataRequired(message="Укажите пароль."), check_password_strength],
     )
     submit = SubmitField("Войти")
 

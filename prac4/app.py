@@ -1,3 +1,4 @@
+import os
 import secrets
 import string
 from datetime import datetime
@@ -14,7 +15,7 @@ from wtforms.validators import DataRequired, EqualTo, Length, Regexp
 # ── App setup ─────────────────────────────────────────────────────────────────
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "my-blog-secret-2024"
+app.config["SECRET_KEY"] = os.urandom(256)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///blog.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["WTF_CSRF_ENABLED"] = True

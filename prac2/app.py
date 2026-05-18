@@ -16,39 +16,18 @@ from flask import (
     url_for,
     abort,
 )
+from utils import load_json, save_json
+
+
 
 app = Flask(__name__)
-app.secret_key = "my-super-secret"
+app.secret_key = os.urandom(256)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
 BASE_PATH = Path(__file__).resolve().parent
 UPLOAD_FOLDER = BASE_PATH / "uploads"
-DATA_FOLDER = BASE_PATH / "data"
-DB_FILE = DATA_FOLDER / "filebase.json"
-
 BLOCKED_EXTENSIONS = {".exe", ".sh", ".php", ".js"}
 
-
-# ── Storage helpers ──────────────────────────────────────────────────────────
-
-def _ensure_dirs():
-    UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
-    DATA_FOLDER.mkdir(parents=True, exist_ok=True)
-    if not DB_FILE.exists():
-        DB_FILE.write_text(json.dumps({}, ensure_ascii=False, indent=4), encoding="utf-8")
-
-
-def load_db() -> dict:
-    _ensure_dirs()
-    return json.loads(DB_FILE.read_text(encoding="utf-8"))
-
-
-def save_db(records: dict) -> None:
-    _ensure_dirs()
-    DB_FILE.write_text(json.dumps(records, ensure_ascii=False, indent=4), encoding="utf-8")
-
-
-# ── File helpers ─────────────────────────────────────────────────────────────
 
 def get_extension(name: str) -> str:
     return Path(name).suffix.lower()
@@ -58,7 +37,7 @@ def is_blocked(name: str) -> bool:
     return get_extension(name) in BLOCKED_EXTENSIONS
 
 
-def md5_of_stream(file_obj) -> str:
+def md5_of_stream(file_obj):
     h = hashlib.md5()
     file_obj.stream.seek(0)
     while chunk := file_obj.stream.read(8192):
@@ -74,8 +53,6 @@ def build_save_path(file_id: str, ext: str):
     rel = subdir / filename
     return rel, BASE_PATH / rel
 
-
-# ── Routes ───────────────────────────────────────────────────────────────────
 
 @app.route("/files/<path:filepath>")
 def download_file(filepath):
@@ -110,7 +87,7 @@ def index():
             return redirect(url_for("index"))
 
         digest = md5_of_stream(uploaded)
-        records = load_db()
+        records = load_json('data', 'filebase.json')
 
         if any(r["md5"] == digest for r in records.values()):
             flash("Этот файл уже загружен (совпадение по MD5).", "error")
@@ -134,18 +111,18 @@ def index():
             "mime": mime or "application/octet-stream",
         }
 
-        save_db(records)
+        save_json('data', 'filebase.json', records)
         flash("Файл успешно загружен!", "success")
         return redirect(url_for("index"))
 
-    records = load_db()
+    records = load_json('data', 'filebase.json')
     file_list = sorted(records.values(), key=lambda r: r["uploaded_at"], reverse=True)
     return render_template("upload.html", files=file_list)
 
 
 @app.route("/delete/<file_id>", methods=["POST"])
 def delete_file(file_id):
-    records = load_db()
+    records = load_json('data', 'filebase.json')
 
     if file_id not in records:
         flash("Файл не найден.", "error")
@@ -156,11 +133,10 @@ def delete_file(file_id):
         abs_path.unlink()
 
     del records[file_id]
-    save_db(records)
+    save_json('data', 'filebase.json', records)
     flash("Файл удалён.", "success")
     return redirect(url_for("index"))
 
 
 if __name__ == "__main__":
-    _ensure_dirs()
     app.run(debug=True)
