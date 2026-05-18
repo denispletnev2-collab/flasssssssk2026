@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Вход    <div style="margin-top: 20px; text-align: center; font-size: 0.75rem; color: var(--muted);">
+        Нет аккаунта? <a href="{{ url_for('signup') }}" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor;">Зарегистрироваться</a>
+    </div>
+{% endblock %}
+
+{% block head %}
+<style>
+    main { display: grid; place-items: center; padding-top: 80px; }
+    .login-card { width: 100%; max-width: 400px; animation: fadeUp 0.4s ease both; }
+    .login-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .login-title span { color: var(--accent); }
+    .login-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 36px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-card">
+    <div class="login-title">dev<span>blog</span></div>
+    <div class="login-sub">Войдите чтобы писать посты</div>
+    <div class="card">
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="field">
+                {{ form.username.label }}
+                {{ form.username(placeholder="ваш логин") }}
+                {% for e in form.username.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="field">
+                {{ form.password.label }}
+                {{ form.password(placeholder="••••••••") }}
+                {% for e in form.password.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+            {{ form.submit(class="btn btn-full") }}
+        </form>
+    </div>
+</div>
+{% endblock %}

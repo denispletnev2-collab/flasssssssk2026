@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Пользователи{% endblock %}
+
+{% block head %}
+<style>
+    .layout { display: grid; grid-template-columns: 320px 1fr; gap: 32px; align-items: start; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    .form-card { animation: fadeDown 0.4s ease 0.1s both; }
+    .form-card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 22px; }
+    .table-wrap { animation: fadeDown 0.4s ease 0.15s both; }
+    table { width: 100%; border-collapse: collapse; }
+    th { font-family: 'Syne', sans-serif; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); font-weight: 600; }
+    td { padding: 13px 12px; font-size: 0.78rem; border-bottom: 1px solid #1a1a1a; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface); }
+    .uname { font-family: 'Syne', sans-serif; font-weight: 600; color: var(--accent); }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 0.63rem; letter-spacing: 0.05em; border: 1px solid; }
+    .badge-admin { border-color: var(--accent); color: var(--accent); }
+    .badge-user { border-color: var(--border); color: var(--muted); }
+    .ts { color: var(--muted); font-size: 0.7rem; }
+    .empty-row td { text-align: center; color: var(--muted); padding: 32px; }
+    .page-h { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -0.03em; margin-bottom: 32px; animation: fadeDown 0.3s ease both; }
+    .page-h span { color: var(--accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-h">управление <span>пользователями</span></div>
+
+<div class="layout">
+    <div class="form-card card">
+        <div class="form-card-title">Новый пользователь</div>
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="field">
+                {{ form.username.label }}
+                {{ form.username(placeholder="например: john_doe") }}
+                {% for e in form.username.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field">
+                {{ form.password.label }}
+                {{ form.password(placeholder="••••••••") }}
+                {% for e in form.password.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field">
+                {{ form.password_confirm.label }}
+                {{ form.password_confirm(placeholder="••••••••") }}
+                {% for e in form.password_confirm.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="checkbox-row">
+                {{ form.is_admin() }}
+                {{ form.is_admin.label }}
+            </div>
+
+            {{ form.submit(class="btn btn-full") }}
+        </form>
+    </div>
+
+    <div class="table-wrap">
+        <div class="section-title">Пользователи — {{ users | length }}</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Логин</th>
+                    <th>Роль</th>
+                    <th>Регистрация</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if users %}
+                {% for u in users %}
+                <tr>
+                    <td class="uname">{{ u.username }}</td>
+                    <td>
+                        {% if u.is_admin %}
+                        <span class="badge badge-admin">admin</span>
+                        {% else %}
+                        <span class="badge badge-user">user</span>
+                        {% endif %}
+                    </td>
+                    <td class="ts">{{ u.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr class="empty-row"><td colspan="3">Пользователей нет</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{ heading }}{% endblock %}
+
+{% block head %}
+<style>
+    .form-wrap { max-width: 680px; animation: fadeDown 0.4s ease both; }
+    .form-heading { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -0.03em; margin-bottom: 28px; }
+    .form-heading span { color: var(--accent); }
+    textarea { min-height: 220px; }
+    .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+    <div class="form-heading">{{ heading | replace(' ', '</span> <span style="color:var(--accent)">') | safe }}</div>
+
+    <div class="card">
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="field">
+                {{ form.title.label }}
+                {{ form.title(placeholder="Заголовок поста...") }}
+                {% for e in form.title.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="field">
+                {{ form.body.label }}
+                {{ form.body(placeholder="Текст поста...") }}
+                {% for e in form.body.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="checkbox-row">
+                {{ form.is_private() }}
+                {{ form.is_private.label }}
+            </div>
+
+            <div class="form-actions">
+                {{ form.submit(class="btn") }}
+                <a href="{{ url_for('feed') }}" class="btn-ghost">отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
